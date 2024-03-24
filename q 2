@@ -1,0 +1,139 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct NoQueue{
+  int num; //numero do pedido
+  char desc[50]; //descricao do pedido
+  struct NoQueue *prox;
+} TNoQueue;
+
+typedef struct queue{
+  TNoQueue *inicio;
+  TNoQueue *fim;
+} Queue;
+
+void inicializar(Queue* fila) {
+    fila->inicio = NULL;
+    fila->fim = NULL;
+}
+
+void opcoes(){
+  printf("\nOpções:\n");
+  printf("1 - Adicionar um novo pedido\n");
+  printf("2 - Atender um pedido\n");
+  printf("3 - Mostrar os pedidos que ainda não foram atendidos\n");
+  printf("0 - Terminar o programa\n");
+}
+
+int isEmpty(Queue* fila){
+  if(fila->inicio == NULL && fila->fim ==NULL){
+    return 1;
+  } else{
+    return 0;
+  }
+}
+
+void adicionar(Queue* fila, int count, int i, char descricao[i]){
+  TNoQueue *aux;
+  TNoQueue *novo = (TNoQueue*) malloc(sizeof(TNoQueue));
+  strcpy(novo->desc,descricao);
+  novo->prox = NULL;
+  novo->num = count;
+  //aux->num = count;
+
+  if (isEmpty(fila)==1){ //se tiver vazia
+    fila->inicio = novo;
+    fila->fim = novo;
+  } else{ //se nao tiver vazia
+    fila->fim->prox = novo; //o ultimo da fila passa a ter o endereço de novo
+    fila->fim = novo;//fim passa a ter endereço do novo
+  }
+}
+
+int atender(Queue* fila){
+  TNoQueue *aux;
+  int atendido;
+  aux = fila->inicio;
+  atendido = fila->inicio->num;
+  aux = fila->inicio->prox;
+  free(fila->inicio);
+  fila->inicio->prox = NULL;
+  fila->inicio = aux;
+  if (fila->inicio == NULL){ //atualizar o fim
+    fila->fim = NULL;
+  } //se nao atualizar o fim, a funcao isEmpty não vai funcionar 100% corretamente
+
+  return atendido;
+}
+
+int isFull(Queue* fila){
+  return 0;
+}
+
+void imprimir(Queue fila) { // imprimir a fila
+  TNoQueue* aux1;
+  aux1 = fila.inicio;
+  while(aux1->prox != NULL){
+    printf("Pedido %d: ", aux1->num);
+    printf("%s", aux1->desc);
+    aux1 = aux1->prox; //seguir adiante enquanto a string for diferente da busca
+  }
+  printf("Pedido %d: ", aux1->num);
+  printf("%s",aux1->desc); //imprime o ultimo
+  //printf("\n");
+}
+
+int main(void) {
+
+  Queue minhaFila;
+  int opcao;
+  int quant = 1;
+  char desc[50];
+  inicializar(&minhaFila);
+  
+  do{
+    opcoes();
+    scanf("%d",&opcao);
+    switch(opcao){
+      case 1:
+        setbuf(stdin, NULL);
+        printf("\nDiga a descrição do pedido %d:\n",quant);
+        fgets(desc,50,stdin);
+        if (isFull(&minhaFila) == 0){
+          adicionar(&minhaFila,quant,50,desc);
+          printf("Adicionado com sucesso!\n");
+          quant++;
+        } else{
+          printf("Fila cheia!\n");
+        }
+        
+        break;
+      case 2:
+        if (isEmpty(&minhaFila) == 0){
+          printf("Pedido %d atendido!\n", atender(&minhaFila));
+        } else{
+          printf("Fila vazia!\n");
+        }
+        break;
+      case 3:
+        if (isEmpty(&minhaFila)==0){
+          imprimir(minhaFila);//pra ver se está tudo certo
+        } else{
+          printf("Fila vazia!\n");
+        }
+        
+        break;
+      case 0:
+        printf("Fim do programa\n");
+      default: 
+        printf("Opção inválida\n");
+    }
+  } while(opcao != 0);
+  
+
+  
+  return 0;
+}
