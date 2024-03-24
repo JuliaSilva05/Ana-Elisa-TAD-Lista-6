@@ -1,0 +1,210 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct noQueue {
+    char string[30]; //antes info
+    struct noQueue* prox;
+}TNoQueue;
+
+typedef struct queue {
+    TNoQueue* inicio, * fim;
+} Queue;
+
+void inicializar(Queue* fila) {
+    fila->inicio = NULL;
+    fila->fim = NULL;
+}
+
+int isEmpty(Queue fila) { // checa se a fila está vazia
+    if (fila.inicio == NULL && fila.fim ==NULL){
+      return 1;
+    } else{
+      return 0;
+    }
+} //precisa q tanto inicio quanto fim sejam nulos p/ funcionar
+
+void enqueue(Queue* fila, int i, char string[i]) { // enfileirar
+    TNoQueue* novo;
+    TNoQueue* aux;
+    novo = (TNoQueue*)malloc(sizeof(TNoQueue));
+    strcpy(novo->string, string);
+    novo->prox = NULL;
+  
+    if (isEmpty(*fila)==1){ //se tiver vazia
+      fila->inicio = novo;
+      fila->fim = novo;
+    } else{ //se nao tiver vazia
+      fila->fim->prox = novo; //o ultimo da fila passa a ter o endereço de novo
+      fila->fim = novo;//fim passa a ter endereço do novo
+    }
+
+
+}
+
+char* dequeue(Queue* fila) {  // desenfileirar
+  TNoQueue *aux;
+  char* desenf = (char*)malloc(30 * sizeof(char)); 
+  aux = fila->inicio;
+  strcpy(desenf, fila->inicio->string);
+  aux = fila->inicio->prox;
+  free(fila->inicio);
+  fila->inicio->prox = NULL;
+  fila->inicio = aux;
+  
+  if (fila->inicio == NULL){ //atualizar o fim
+    fila->fim = NULL;
+  } //se nao atualizar o fim, a funcao isEmpty não vai funcionar 100% corretamente
+
+  return desenf;
+
+}
+
+char *head(Queue fila) {   // retornar o valor que está no início da fila
+    return fila.inicio->string;
+    //retornando o valor no inicio
+}
+
+int isFull(Queue fila) { // checa se a fila está cheia
+    return 0;
+  //sempre retorna 0, pois nunca vai ficar cheio
+}
+
+void buscar(Queue* fila, char * busca){
+  TNoQueue* aux1;
+  TNoQueue* aux2; //aux 2
+  aux1 = fila->inicio;
+  aux2 = fila->inicio;
+  int count = 0;
+  int yesno = 0;
+
+  while (aux1->prox != NULL){ //se a string nao for vazia
+    if (strcmp(aux1->string, busca) == 0) { //se a string apontada por aux1 for igual a busca
+      if (count == 0){ //se for o primeiro elemento
+        fila->inicio = aux1->prox; //remove o elemento do começo
+      } else {
+        aux2->prox = aux1->prox; //remove o elemento do meio
+      }
+      free(aux1); //libera o espaço de memoria
+      printf("Elemento '%s' encontrado e removido\n",busca);
+      yesno = 1;
+      return;
+    }
+    aux2 = aux1; 
+    aux1 = aux1->prox;
+    count++;
+  }
+
+  if (aux1->prox == NULL){ //se a busca estiver no fim
+    if (strcmp(aux1->string, busca) == 0) { //se a string apontada por aux1 for igual a busca
+      fila->fim = aux2; //remove o elemento do fim
+      aux2->prox = NULL;
+      free(aux1);
+      yesno = 1;
+    }
+    //printf("Final\n");//coloquei esse pra testar se tava funcionando mesmo
+    
+  }
+  
+  if (yesno ==0){
+    printf("Elemento '%s' não encontrado\n",busca);
+  }
+  
+   //percorrer a fila até achar a string que seja igual a que você está procurando (a que vc inseriu no parametro)
+  //se achar, printar que achou e retirar da fila
+
+  //se nao achar, printar que nao achou e retirar da fila
+
+}
+
+
+void imprimir(Queue fila) { // imprimir a fila
+  TNoQueue* aux1;
+  aux1 = fila.inicio;
+  while(aux1->prox != NULL){
+    printf("%s, ", aux1->string);
+    aux1 = aux1->prox; //seguir adiante enquanto a string for diferente da busca
+  }
+  printf("%s",aux1->string); //imprime o ultimo
+  printf("\n");
+}
+
+
+void exibirOpcoes() {
+    printf("\nOpções: \n");
+    printf("1 - Enqueue \n");
+    printf("2 - Dequeue \n");
+    printf("3 - Head \n");
+    printf("4 - Cancel\n");
+    printf("5 - List \n");
+    printf("0 - Encerrar programa \n");
+    printf("Informe a opção desejada: ");
+}
+
+int main()
+{
+    Queue minhaFila;
+    inicializar(&minhaFila);
+    int op;
+    char nome[30];
+    do {
+        exibirOpcoes();
+        scanf("%d", &op);
+        switch (op) {
+        case 1: printf("Informe o nome do arquivo: "); //enqueue
+              scanf("%s", nome);
+            if (isFull(minhaFila)==0){
+              enqueue(&minhaFila,30, nome);
+              printf("Enfileirado com sucesso!\n");
+            } else{
+              printf("Fila cheia!\n");
+            }
+            break;
+          
+        case 2: //dequeue
+            if (isEmpty(minhaFila)==0){ //se nao for nulo
+              printf("Valor desenfileirado: %s\n", dequeue(&minhaFila));
+            } else{
+              printf("Fila vazia!\n");
+            }
+            break;
+          
+        case 3: //head
+            if (isEmpty(minhaFila)==0){ //se nao for nulo
+              printf("O primeiro da lista é: %s\n",head(minhaFila));
+            } else{
+              printf("Fila vazia!\n");
+            }
+            break;
+
+        case 4: //cancel
+            if(isEmpty(minhaFila)==0){
+              printf("Diga qual arquivo deseja cancelar: ");
+              scanf("%s", nome);
+              buscar(&minhaFila, nome);
+              
+            } else{
+              printf("Fila vazia!\n");
+            }
+          
+            break;
+          
+        case 5: //listar
+          if (isEmpty(minhaFila)==0){ 
+            printf("Fila: ");
+            imprimir(minhaFila);
+          } else{
+            printf("Fila vazia!\n");
+          }
+            
+            break;
+          
+        case 0: printf("Fim de programa!");
+            break;
+        default: printf("Opção inválida!");
+        }
+    } while (op != 0);
+    return 0;
+}
